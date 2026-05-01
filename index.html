@@ -778,8 +778,8 @@ function showPage(page, el){
   document.getElementById('page-'+page).style.display='';
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   if(el) el.classList.add('active');
-  const titles = {dashboard:'Dashboard',projects:'Active Projects',tenders:'Tenders',report:'Weekly Report'};
-  const subs   = {dashboard:'OLS Operations Hub — Overview',projects:'Client workstreams and operational status',tenders:'RFQ, RFX and direct negotiations',report:'Generate your weekly meeting document'};
+  const titles = {dashboard:'Dashboard',projects:'Active Projects',tenders:'Tenders',report:'Weekly Report',help:'Help & Guide'};
+  const subs   = {dashboard:'OLS Operations Hub — Overview',projects:'Client workstreams and operational status',tenders:'RFQ, RFX and direct negotiations',report:'Generate your weekly meeting document',help:'How to use the OLS Operations Hub'};
   document.getElementById('topbar-title').textContent = titles[page]||page;
   document.getElementById('topbar-sub').textContent   = subs[page]||'';
   document.getElementById('topbar-action-btn').textContent = page==='tenders' ? '+ New Tender' : '+ New Entry';
