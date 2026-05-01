@@ -1011,7 +1011,11 @@ function renderProjects(){
   if(projFilter!=='all'&&projFilter!=='Blocked') list=list.filter(p=>p.service===projFilter);
   if(projFilter==='Blocked') list=list.filter(p=>p.status==='Blocked');
   if(q) list=list.filter(p=>(p.client+p.workstream+p.service+p.owner).toLowerCase().includes(q));
-
+const py=(document.getElementById('proj-year-filter')||{}).value||'';
+if(py) list=list.filter(p=>p.deadline&&p.deadline.slice(0,4)===py);
+const pmEl=document.getElementById('proj-month-filter');
+const pm=pmEl?[...pmEl.selectedOptions].map(o=>o.value):[];
+if(pm.length) list=list.filter(p=>p.deadline&&pm.includes(p.deadline.slice(5,7)));
   const board=document.getElementById('proj-board');
   if(!list.length){board.innerHTML='<div class="empty-box"><h3>No entries found</h3><p>Add a new project entry or adjust filters</p></div>';return;}
 
@@ -1068,7 +1072,11 @@ function renderTenders(){
   let list=[...tenders];
   if(tendFilter!=='all') list=list.filter(t=>t.status===tendFilter);
   if(q) list=list.filter(t=>(t.client+t.type+t.owner).toLowerCase().includes(q));
-
+const ty=(document.getElementById('tend-year-filter')||{}).value||'';
+if(ty) list=list.filter(t=>t.deadline&&t.deadline.slice(0,4)===ty);
+const tmEl=document.getElementById('tend-month-filter');
+const tm=tmEl?[...tmEl.selectedOptions].map(o=>o.value):[];
+if(tm.length) list=list.filter(t=>t.deadline&&tm.includes(t.deadline.slice(5,7)));
   const board=document.getElementById('tend-board');
   if(!list.length){board.innerHTML='<div class="empty-box" style="border:none;box-shadow:none;"><h3>No tenders found</h3><p>Add a tender or adjust the filter</p></div>';return;}
   board.innerHTML = list.map(t=>buildTendRow(t)).join('');
