@@ -199,6 +199,31 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 .empty-box h3{font-size:14px;font-weight:600;color:var(--text-2);margin-bottom:6px;}
 .empty-box p{font-size:12.5px;margin-bottom:14px;}
 
+  /* ── FILTER DROPDOWN ── */
+.filter-dropdown{position:relative;display:inline-block;}
+.filter-dropdown-btn{display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:99px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border-md);background:var(--surface);color:var(--text-2);transition:all 0.12s;user-select:none;}
+.filter-dropdown-btn:hover{border-color:var(--teal-mid);color:var(--teal);}
+.filter-dropdown-btn.has-filter{border-color:var(--teal);color:var(--teal-dark);background:var(--teal-light);}
+.filter-dropdown-btn .arrow{font-size:9px;transition:transform 0.15s;}
+.filter-dropdown-btn.open .arrow{transform:rotate(180deg);}
+.filter-dropdown-menu{display:none;position:absolute;top:calc(100% + 6px);left:0;background:var(--surface);border:1px solid var(--border-md);border-radius:var(--radius);box-shadow:var(--shadow-md);padding:10px;z-index:200;min-width:200px;}
+.filter-dropdown-menu.open{display:block;}
+.fdm-section{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-3);margin-bottom:6px;margin-top:10px;}
+.fdm-section:first-child{margin-top:0;}
+.fdm-year-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px;}
+.fdm-year-btn{padding:3px 10px;border-radius:99px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border-md);background:var(--bg);color:var(--text-2);transition:all 0.12s;}
+.fdm-year-btn:hover{border-color:var(--teal-mid);color:var(--teal);}
+.fdm-year-btn.sel{border-color:var(--teal);color:var(--teal-dark);background:var(--teal-light);}
+.fdm-months{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;}
+.fdm-month-btn{padding:4px 6px;border-radius:6px;font-size:11px;font-weight:500;cursor:pointer;border:1px solid var(--border-md);background:var(--bg);color:var(--text-2);transition:all 0.12s;text-align:center;}
+.fdm-month-btn:hover{border-color:var(--teal-mid);color:var(--teal);}
+.fdm-month-btn.sel{border-color:var(--teal);color:var(--teal-dark);background:var(--teal-light);}
+.fdm-footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--border);}
+.fdm-clear{font-size:11.5px;color:var(--text-3);cursor:pointer;background:none;border:none;font-family:var(--font);}
+.fdm-clear:hover{color:var(--red);}
+.fdm-apply{font-size:12px;font-weight:600;color:#fff;background:var(--teal);border:none;border-radius:6px;padding:5px 14px;cursor:pointer;font-family:var(--font);}
+.fdm-apply:hover{background:var(--teal-dark);}
+  
 /* ── MODAL ── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,20,15,0.5);z-index:500;align-items:center;justify-content:center;padding:1rem;}
 .modal-overlay.open{display:flex;}
@@ -565,27 +590,38 @@ textarea{resize:vertical;min-height:68px;line-height:1.5;}
         <div class="filter-pill" onclick="setProjFilter('Technology',this)">Technology</div>
         <div class="filter-pill" onclick="setProjFilter('Advisory',this)">Advisory</div>
         <div class="filter-pill" onclick="setProjFilter('Blocked',this)">Blocked</div>
-        <select id="proj-year-filter" onchange="renderProjects()" style="padding:4px 10px;border-radius:99px;font-size:12px;font-weight:500;border:1px solid var(--border-md);background:var(--surface);color:var(--text-2);cursor:pointer;outline:none;">
-  <option value="">All Years</option>
-  <option value="2025">2025</option>
-  <option value="2026">2026</option>
-  <option value="2027">2027</option>
-</select>
-<select id="proj-month-filter" multiple onchange="renderProjects()" style="padding:4px 8px;border-radius:var(--radius-sm);font-size:12px;border:1px solid var(--border-md);background:var(--surface);color:var(--text-2);cursor:pointer;outline:none;min-width:80px;" title="Hold Ctrl/Cmd to select multiple months">
-  <option value="01">Jan</option>
-  <option value="02">Feb</option>
-  <option value="03">Mar</option>
-  <option value="04">Apr</option>
-  <option value="05">May</option>
-  <option value="06">Jun</option>
-  <option value="07">Jul</option>
-  <option value="08">Aug</option>
-  <option value="09">Sep</option>
-  <option value="10">Oct</option>
-  <option value="11">Nov</option>
-  <option value="12">Dec</option>
-</select>
-<span style="font-size:11px;color:var(--text-3);">Hold Ctrl to multi-select</span>
+        <div class="filter-dropdown" id="proj-filter-dd">
+  <div class="filter-dropdown-btn" id="proj-filter-btn" onclick="toggleFilterDD('proj')">
+    Filter by Date <span class="arrow">▼</span>
+  </div>
+  <div class="filter-dropdown-menu" id="proj-filter-menu">
+    <div class="fdm-section">Year</div>
+    <div class="fdm-year-row">
+      <div class="fdm-year-btn" onclick="toggleYear('proj','2025',this)">2025</div>
+      <div class="fdm-year-btn" onclick="toggleYear('proj','2026',this)">2026</div>
+      <div class="fdm-year-btn" onclick="toggleYear('proj','2027',this)">2027</div>
+    </div>
+    <div class="fdm-section">Month</div>
+    <div class="fdm-months">
+      <div class="fdm-month-btn" onclick="toggleMonth('proj','01',this)">Jan</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('proj','02',this)">Feb</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('proj','03',this)">Mar</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('proj','04',this)">Apr</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('proj','05',this)">May</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('proj','06',this)">Jun</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('proj','07',this)">Jul</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('proj','08',this)">Aug</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('proj','09',this)">Sep</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('proj','10',this)">Oct</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('proj','11',this)">Nov</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('proj','12',this)">Dec</div>
+    </div>
+    <div class="fdm-footer">
+      <button class="fdm-clear" onclick="clearDateFilter('proj')">Clear</button>
+      <button class="fdm-apply" onclick="applyDateFilter('proj')">Apply</button>
+    </div>
+  </div>
+</div>
       </div>
       <div id="proj-board"></div>
     </div>
@@ -609,27 +645,38 @@ textarea{resize:vertical;min-height:68px;line-height:1.5;}
         <div class="filter-pill" onclick="setTendFilter('Negotiating',this)">Negotiating</div>
         <div class="filter-pill" onclick="setTendFilter('Won',this)">Won</div>
         <div class="filter-pill" onclick="setTendFilter('Lost',this)">Lost</div>
-        <select id="tend-year-filter" onchange="renderTenders()" style="padding:4px 10px;border-radius:99px;font-size:12px;font-weight:500;border:1px solid var(--border-md);background:var(--surface);color:var(--text-2);cursor:pointer;outline:none;">
-  <option value="">All Years</option>
-  <option value="2025">2025</option>
-  <option value="2026">2026</option>
-  <option value="2027">2027</option>
-</select>
-<select id="tend-month-filter" multiple onchange="renderTenders()" style="padding:4px 8px;border-radius:var(--radius-sm);font-size:12px;border:1px solid var(--border-md);background:var(--surface);color:var(--text-2);cursor:pointer;outline:none;min-width:80px;" title="Hold Ctrl/Cmd to select multiple months">
-  <option value="01">Jan</option>
-  <option value="02">Feb</option>
-  <option value="03">Mar</option>
-  <option value="04">Apr</option>
-  <option value="05">May</option>
-  <option value="06">Jun</option>
-  <option value="07">Jul</option>
-  <option value="08">Aug</option>
-  <option value="09">Sep</option>
-  <option value="10">Oct</option>
-  <option value="11">Nov</option>
-  <option value="12">Dec</option>
-</select>
-<span style="font-size:11px;color:var(--text-3);">Hold Ctrl to multi-select</span>
+      <div class="filter-dropdown" id="tend-filter-dd">
+  <div class="filter-dropdown-btn" id="tend-filter-btn" onclick="toggleFilterDD('tend')">
+    Filter by Date <span class="arrow">▼</span>
+  </div>
+  <div class="filter-dropdown-menu" id="tend-filter-menu">
+    <div class="fdm-section">Year</div>
+    <div class="fdm-year-row">
+      <div class="fdm-year-btn" onclick="toggleYear('tend','2025',this)">2025</div>
+      <div class="fdm-year-btn" onclick="toggleYear('tend','2026',this)">2026</div>
+      <div class="fdm-year-btn" onclick="toggleYear('tend','2027',this)">2027</div>
+    </div>
+    <div class="fdm-section">Month</div>
+    <div class="fdm-months">
+      <div class="fdm-month-btn" onclick="toggleMonth('tend','01',this)">Jan</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('tend','02',this)">Feb</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('tend','03',this)">Mar</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('tend','04',this)">Apr</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('tend','05',this)">May</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('tend','06',this)">Jun</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('tend','07',this)">Jul</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('tend','08',this)">Aug</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('tend','09',this)">Sep</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('tend','10',this)">Oct</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('tend','11',this)">Nov</div>
+      <div class="fdm-month-btn" onclick="toggleMonth('tend','12',this)">Dec</div>
+    </div>
+    <div class="fdm-footer">
+      <button class="fdm-clear" onclick="clearDateFilter('tend')">Clear</button>
+      <button class="fdm-apply" onclick="applyDateFilter('tend')">Apply</button>
+    </div>
+  </div>
+</div>  
       </div>
       <div class="sheet-table">
         <div class="tend-head sheet-head-row">
@@ -855,9 +902,11 @@ function renderDashboard(){
   renderDonutChart();
   renderPipelineBars();
 
-  const focusItems = [
-    ...projects.filter(p=>p.status==='Blocked'||isThisWeek(p.deadline)),
-    ...tenders.filter(t=>isThisWeek(t.deadline))
+  let focusItems = [
+  ...projects.filter(p=>p.status==='Blocked'||isThisWeek(p.deadline)),
+  ...tenders.filter(t=>isThisWeek(t.deadline))
+];
+focusItems=applyDF(focusItems,'dash');
   ];
   const fl = document.getElementById('dash-focus-list');
   if(!focusItems.length){
@@ -1001,7 +1050,74 @@ function isThisWeek(ds){
   d.setHours(0,0,0,0);n.setHours(0,0,0,0);we.setDate(we.getDate()+7);we.setHours(0,0,0,0);
   return d>=n&&d<=we;
 }
+// ── DATE FILTER STATE ──
+const dateFilters = {
+  proj: { years:[], months:[] },
+  tend: { years:[], months:[] },
+  dash: { years:[], months:[] }
+};
 
+function toggleFilterDD(scope){
+  const menu=document.getElementById(scope+'-filter-menu');
+  const btn=document.getElementById(scope+'-filter-btn');
+  const isOpen=menu.classList.contains('open');
+  document.querySelectorAll('.filter-dropdown-menu').forEach(m=>m.classList.remove('open'));
+  document.querySelectorAll('.filter-dropdown-btn').forEach(b=>b.classList.remove('open'));
+  if(!isOpen){ menu.classList.add('open'); btn.classList.add('open'); }
+}
+
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.filter-dropdown')){
+    document.querySelectorAll('.filter-dropdown-menu').forEach(m=>m.classList.remove('open'));
+    document.querySelectorAll('.filter-dropdown-btn').forEach(b=>b.classList.remove('open'));
+  }
+});
+
+function toggleYear(scope,year,el){
+  const f=dateFilters[scope];
+  if(f.years.includes(year)){ f.years=f.years.filter(y=>y!==year); el.classList.remove('sel'); }
+  else{ f.years.push(year); el.classList.add('sel'); }
+}
+
+function toggleMonth(scope,month,el){
+  const f=dateFilters[scope];
+  if(f.months.includes(month)){ f.months=f.months.filter(m=>m!==month); el.classList.remove('sel'); }
+  else{ f.months.push(month); el.classList.add('sel'); }
+}
+
+function applyDateFilter(scope){
+  const menu=document.getElementById(scope+'-filter-menu');
+  const btn=document.getElementById(scope+'-filter-btn');
+  menu.classList.remove('open'); btn.classList.remove('open');
+  const f=dateFilters[scope];
+  const hasFilter=f.years.length||f.months.length;
+  btn.classList.toggle('has-filter',!!hasFilter);
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const label=hasFilter
+    ? (f.years.length&&f.months.length
+      ? f.years.join(',')+' · '+f.months.map(m=>months[parseInt(m)-1]).join(',')
+      : f.years.length ? f.years.join(' / ')
+      : f.months.map(m=>months[parseInt(m)-1]).join(', '))
+    : 'Filter by Date';
+  btn.childNodes[0].textContent=label+' ';
+  if(scope==='proj') renderProjects();
+  else if(scope==='tend') renderTenders();
+  else if(scope==='dash') renderDashboard();
+}
+
+function clearDateFilter(scope){
+  dateFilters[scope]={years:[],months:[]};
+  document.querySelectorAll(`#${scope}-filter-menu .fdm-year-btn`).forEach(b=>b.classList.remove('sel'));
+  document.querySelectorAll(`#${scope}-filter-menu .fdm-month-btn`).forEach(b=>b.classList.remove('sel'));
+  applyDateFilter(scope);
+}
+
+function applyDF(list,scope){
+  const f=dateFilters[scope];
+  if(f.years.length) list=list.filter(x=>x.deadline&&f.years.includes(x.deadline.slice(0,4)));
+  if(f.months.length) list=list.filter(x=>x.deadline&&f.months.includes(x.deadline.slice(5,7)));
+  return list;
+}
 // ── PROJECTS ──
 function setProjFilter(f,el){ projFilter=f; document.querySelectorAll('#page-projects .filter-pill').forEach(p=>p.classList.remove('active')); el.classList.add('active'); renderProjects(); }
 
@@ -1010,7 +1126,7 @@ function renderProjects(){
   let list=[...projects];
   if(projFilter!=='all'&&projFilter!=='Blocked') list=list.filter(p=>p.service===projFilter);
   if(projFilter==='Blocked') list=list.filter(p=>p.status==='Blocked');
-  if(q) list=list.filter(p=>(p.client+p.workstream+p.service+p.owner).toLowerCase().includes(q));
+  if(q) list=list.filter(p=>(p.client+p.workstream+p.service+p.owner).toLowerCase().includes(q));list=applyDF(list,'proj');
 const py=(document.getElementById('proj-year-filter')||{}).value||'';
 if(py) list=list.filter(p=>p.deadline&&p.deadline.slice(0,4)===py);
 const pmEl=document.getElementById('proj-month-filter');
@@ -1071,7 +1187,7 @@ function renderTenders(){
   const q=(document.getElementById('tend-search')||{}).value?.toLowerCase()||'';
   let list=[...tenders];
   if(tendFilter!=='all') list=list.filter(t=>t.status===tendFilter);
-  if(q) list=list.filter(t=>(t.client+t.type+t.owner).toLowerCase().includes(q));
+  if(q) list=list.filter(t=>(t.client+t.type+t.owner).toLowerCase().includes(q));list=applyDF(list,'tend');
 const ty=(document.getElementById('tend-year-filter')||{}).value||'';
 if(ty) list=list.filter(t=>t.deadline&&t.deadline.slice(0,4)===ty);
 const tmEl=document.getElementById('tend-month-filter');
