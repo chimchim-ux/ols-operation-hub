@@ -624,10 +624,7 @@ function showToast(msg,dur=2600){const t=document.getElementById('toast');t.text
 // ── DATE FILTER STATE ──
 const dateFilters={proj:{years:[],months:[]},tend:{years:[],months:[]},dash:{years:[],months:[]}};const statusFilters={proj:[],tend:[]};
 
-function toggleFilterDD(scope){
-  const menu=document.getElementById(scope+'-filter-menu');
-  const btn=document.getElementById(scope+'-filter-btn');
-  function toggleStatusOpt(scope,status,el){
+function toggleStatusOpt(scope,status,el){
   const f=statusFilters[scope];
   if(f.includes(status)){statusFilters[scope]=f.filter(s=>s!==status);el.classList.remove('sel');}
   else{f.push(status);el.classList.add('sel');}
@@ -647,6 +644,9 @@ function clearStatusFilter(scope){
   document.querySelectorAll(`#${scope}-status-filter-menu .fdm-year-btn`).forEach(b=>b.classList.remove('sel'));
   applyStatusFilter(scope);
 }
+function toggleFilterDD(scope){
+  const menu=document.getElementById(scope+'-filter-menu');
+  const btn=document.getElementById(scope+'-filter-btn');
   const isOpen=menu.classList.contains('open');
   document.querySelectorAll('.filter-dropdown-menu').forEach(m=>m.classList.remove('open'));
   document.querySelectorAll('.filter-dropdown-btn').forEach(b=>b.classList.remove('open'));
