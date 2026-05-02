@@ -14,8 +14,6 @@
   --amber:#BA7517; --amber-light:#FAEEDA; --amber-mid:#EF9F27; --amber-dark:#633806;
   --red:#c23a3a; --red-light:#fef2f2; --red-dark:#7f1d1d;
   --blue:#378ADD; --blue-light:#E6F1FB; --blue-dark:#0C447C;
-  --purple:#7F77DD; --purple-light:#EEEDFE; --purple-dark:#3C3489;
-  --green:#1D9E75; --green-light:#E1F5EE; --green-dark:#085041;
   --radius:10px; --radius-sm:6px; --radius-lg:14px;
   --font:'DM Sans',sans-serif; --mono:'DM Mono',monospace;
   --shadow:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
@@ -33,17 +31,19 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 .nav-item{display:flex;align-items:center;gap:9px;padding:8px 16px;cursor:pointer;font-size:13px;color:rgba(255,255,255,0.55);border:none;background:none;width:100%;text-align:left;transition:all 0.12s;}
 .nav-item:hover{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.85);}
 .nav-item.active{background:rgba(29,158,117,0.18);color:#5DCAA5;border-left:2px solid #5DCAA5;}
+.nav-badge{margin-left:auto;font-size:10px;background:rgba(255,255,255,0.1);padding:1px 7px;border-radius:99px;color:rgba(255,255,255,0.6);}
+
 .main{margin-left:230px;flex:1;min-width:0;}
 .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
 .content{padding:24px 28px;}
 
-/* --- DASHBOARD CARDS --- */
+/* --- DASHBOARD CARDS & TABLES --- */
 .dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;}
 .dash-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);}
 .dash-label{font-size:10px;color:var(--text-3);text-transform:uppercase;font-weight:600;}
 .dash-value{font-size:28px;font-weight:600;font-family:var(--mono);}
 
-/* --- NEW FILTER STYLES --- */
+/* --- FILTER DROPDOWN STYLES --- */
 .fdm-btn {
   padding: 6px; font-size: 11px; border: 1px solid var(--border-md);
   background: #fdfdfd; border-radius: 4px; cursor: pointer; text-align: center;
@@ -51,20 +51,25 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 }
 .fdm-btn:hover { border-color: var(--teal); color: var(--teal); }
 
-/* --- BUTTONS & BADGES --- */
+/* --- GLOBAL UI --- */
 .btn{font-family:var(--font);font-size:13px;padding:7px 14px;border-radius:var(--radius-sm);border:1px solid var(--border-md);background:var(--surface);cursor:pointer;}
 .btn-teal{background:var(--teal);color:#fff;border-color:var(--teal);}
 .badge{font-size:10.5px;font-weight:500;padding:2px 8px;border-radius:99px;}
 .b-ontrack{background:#E1F5EE;color:#085041;}
 .b-blocked{background:#fef2f2;color:#7f1d1d;}
 
-/* --- TABLES --- */
 .sheet-table{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
 .proj-row{display:grid;grid-template-columns:180px 110px 1fr 1fr 110px 100px; border-bottom:1px solid var(--border); padding:10px;}
 .sh-cell{font-weight:700; color:var(--text-3); font-size:10px; text-transform:uppercase;}
+
+/* --- MODAL --- */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,20,15,0.5);z-index:500;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:var(--radius-lg);width:90%;max-width:600px;padding:24px;}
 </style>
 </head>
 <body>
+
 <div class="shell">
   <aside class="sidebar">
     <div class="sidebar-logo">
@@ -73,89 +78,162 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
     <div class="nav-section">Main</div>
     <button class="nav-item active" onclick="showPage('dashboard',this)">▦ Dashboard</button>
     <div class="nav-section">Business</div>
-    <button class="nav-item" onclick="showPage('projects',this)">◈ Active Projects</button>
-    <button class="nav-item" onclick="showPage('tenders',this)">◎ Tenders</button>
+    <button class="nav-item" onclick="showPage('projects',this)">◈ Active Projects <span class="nav-badge" id="nb-proj">0</span></button>
+    <button class="nav-item" onclick="showPage('tenders',this)">◎ Tenders <span class="nav-badge" id="nb-tend">0</span></button>
+    <div class="nav-section">Settings</div>
+    <button class="nav-item" onclick="openModal('modal-gs')">⚙ Google Sheets</button>
   </aside>
 
   <div class="main">
     <div class="topbar">
-      <div class="topbar-title">Dashboard</div>
-      <button class="btn btn-teal" onclick="alert('Add Functionality Here')">+ New Entry</button>
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-actions">
+        <button class="btn" onclick="exportCSV()">Export CSV</button>
+        <button class="btn btn-teal" onclick="openAddModal()">+ New Entry</button>
+      </div>
     </div>
 
     <div class="content">
       <div id="page-dashboard">
         <div class="dash-grid">
-          <div class="dash-card"><div class="dash-label">Active Projects</div><div class="dash-value">12</div></div>
-          <div class="dash-card"><div class="dash-label">Tenders</div><div class="dash-value">4</div></div>
-          <div class="dash-card"><div class="dash-label">Due Soon</div><div class="dash-value">3</div></div>
-          <div class="dash-card" style="border-left: 4px solid var(--red);"><div class="dash-label">Blocked</div><div class="dash-value">1</div></div>
+          <div class="dash-card"><div class="dash-label">Active Projects</div><div class="dash-value" id="stat-proj">0</div></div>
+          <div class="dash-card"><div class="dash-label">Tenders</div><div class="dash-value" id="stat-tend">0</div></div>
+          <div class="dash-card"><div class="dash-label">Due Soon</div><div class="dash-value">0</div></div>
+          <div class="dash-card"><div class="dash-label">Blocked</div><div class="dash-value">0</div></div>
         </div>
 
-        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div class="section-header" style="display: flex; justify-content: space-between; margin-bottom: 20px;">
           <div>
-            <div style="font-size:15px; font-weight:600;">This Week's Focus</div>
-            <div style="font-size:12px; color:var(--text-3);">Items due within 7 days or blocked</div>
+            <div style="font-size:15px; font-weight:600;">Workstream Overview</div>
           </div>
-
           <div class="filter-dropdown" style="position: relative;">
-            <div class="btn" id="dash-filter-btn" onclick="toggleFilterDD()" style="border-radius: 20px; display: flex; align-items: center; gap: 8px;">
-              <span id="active-filter-text">Filter by Month</span> <span>▼</span>
+            <div class="btn" id="dash-filter-btn" onclick="toggleFilterDD()" style="border-radius: 20px;">
+              <span id="active-filter-text">Filter by Month</span> ▼
             </div>
-            
             <div id="dash-filter-menu" style="display: none; position: absolute; right: 0; top: 40px; width: 240px; background: white; border: 1px solid var(--border-md); padding: 15px; border-radius: 12px; box-shadow: var(--shadow-md); z-index: 100;">
-              <div style="font-size: 10px; font-weight: 700; color: var(--text-3); margin-bottom: 8px;">YEAR</div>
+              <div class="fdm-section" style="font-size: 10px; font-weight:700; margin-bottom: 8px;">YEAR</div>
               <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 15px;">
                 <button class="fdm-btn" onclick="setYear('2025', this)">2025</button>
                 <button class="fdm-btn" onclick="setYear('2026', this)">2026</button>
                 <button class="fdm-btn" onclick="setYear('2027', this)">2027</button>
               </div>
-              <div style="font-size: 10px; font-weight: 700; color: var(--text-3); margin-bottom: 8px;">MONTH</div>
+              <div class="fdm-section" style="font-size: 10px; font-weight:700; margin-bottom: 8px;">MONTH</div>
               <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;">
                 <button class="fdm-btn" onclick="setMonth(0, 'Jan', this)">Jan</button>
                 <button class="fdm-btn" onclick="setMonth(1, 'Feb', this)">Feb</button>
                 <button class="fdm-btn" onclick="setMonth(2, 'Mar', this)">Mar</button>
                 <button class="fdm-btn" onclick="setMonth(3, 'Apr', this)">Apr</button>
-                <button class="fdm-btn" onclick="setMonth(4, 'May', this)">May</button>
-                <button class="fdm-btn" onclick="setMonth(5, 'Jun', this)">Jun</button>
-                <button class="fdm-btn" onclick="setMonth(6, 'Jul', this)">Jul</button>
-                <button class="fdm-btn" onclick="setMonth(7, 'Aug', this)">Aug</button>
-                <button class="fdm-btn" onclick="setMonth(8, 'Sep', this)">Sep</button>
-                <button class="fdm-btn" onclick="setMonth(9, 'Oct', this)">Oct</button>
-                <button class="fdm-btn" onclick="setMonth(10, 'Nov', this)">Nov</button>
-                <button class="fdm-btn" onclick="setMonth(11, 'Dec', this)">Dec</button>
-              </div>
+                </div>
               <div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 10px; display: flex; justify-content: space-between;">
-                <button onclick="clearFilter()" style="background:none; border:none; color:var(--red); cursor:pointer; font-size:11px;">Clear</button>
-                <button onclick="applyFilter()" class="btn btn-teal" style="padding: 4px 10px; font-size:11px;">Apply</button>
+                <button onclick="clearFilter()" style="border:none; background:none; color:var(--red); cursor:pointer;">Clear</button>
+                <button onclick="applyFilter()" class="btn btn-teal">Apply</button>
               </div>
             </div>
           </div>
         </div>
 
-        <div id="dash-focus-list">
-          <div class="sheet-table">
-            <div class="proj-row"><div class="sh-cell">Client</div><div class="sh-cell">Status</div><div class="sh-cell">Workstream</div><div class="sh-cell">Update</div><div class="sh-cell">Deadline</div></div>
-            <div class="proj-row"><div>Sample Client</div><div><span class="badge b-ontrack">On Track</span></div><div>Logistics Audit</div><div>Awaiting feedback</div><div>2026-05-10</div></div>
-          </div>
+        <div id="dash-list" class="sheet-table">
+            <div class="proj-row sheet-head-row">
+                <div class="sh-cell">Client</div><div class="sh-cell">Status</div><div class="sh-cell">Workstream</div><div class="sh-cell">Update</div><div class="sh-cell">Deadline</div>
+            </div>
+            <div id="dash-items-container">
+                </div>
         </div>
       </div>
 
       <div id="page-projects" style="display:none;">
-        <h3>Active Projects</h3>
-        <p>Project data will load here...</p>
+        <h3>All Projects</h3>
+        <div id="projects-container"></div>
       </div>
 
       <div id="page-tenders" style="display:none;">
-        <h3>Tender List</h3>
-        <p>Tender data will load here...</p>
+        <h3>All Tenders</h3>
+        <div id="tenders-container"></div>
       </div>
     </div>
   </div>
 </div>
 
+<div id="modal-gs" class="modal-overlay">
+    <div class="modal">
+        <h3>Google Sheets Sync</h3>
+        <p>Enter your Web App URL to sync data with Google Sheets.</p>
+        <input type="text" id="gs-url" placeholder="https://script.google.com/macros/s/...">
+        <div style="margin-top:20px; text-align:right;">
+            <button class="btn" onclick="closeModal('modal-gs')">Cancel</button>
+            <button class="btn btn-teal" onclick="saveGSConfig()">Save & Sync</button>
+        </div>
+    </div>
+</div>
+
 <script>
-// --- PAGE NAVIGATION ---
+let projects = [];
+let tenders = [];
+let selectedYear = null;
+let selectedMonth = null;
+let selectedMonthName = "";
+
+// --- NAVIGATION ---
 function showPage(pageId, el) {
     document.querySelectorAll('[id^="page-"]').forEach(p => p.style.display = 'none');
-    document.getElementById('
+    document.getElementById('page-' + pageId).style.display = 'block';
+    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('topbar-title').innerText = pageId.charAt(0).toUpperCase() + pageId.slice(1);
+}
+
+// --- FILTER UI ---
+function toggleFilterDD() {
+    const m = document.getElementById('dash-filter-menu');
+    m.style.display = m.style.display === 'none' ? 'block' : 'none';
+}
+function setYear(y, el) { 
+    selectedYear = y; 
+    el.parentElement.querySelectorAll('.fdm-btn').forEach(b => b.style.background=""); 
+    el.style.background="var(--teal-light)"; 
+}
+function setMonth(m, name, el) { 
+    selectedMonth = m; selectedMonthName = name; 
+    el.parentElement.querySelectorAll('.fdm-btn').forEach(b => b.style.background=""); 
+    el.style.background="var(--teal-light)"; 
+}
+function applyFilter() {
+    document.getElementById('active-filter-text').innerText = (selectedMonthName || "") + " " + (selectedYear || "");
+    toggleFilterDD();
+    renderAll();
+}
+function clearFilter() {
+    selectedYear = null; selectedMonth = null; selectedMonthName = "";
+    document.getElementById('active-filter-text').innerText = "Filter by Month";
+    document.querySelectorAll('.fdm-btn').forEach(b => b.style.background="");
+    toggleFilterDD();
+    renderAll();
+}
+
+// --- CORE LOGIC ---
+function renderAll() {
+    // Update stats
+    document.getElementById('stat-proj').innerText = projects.length;
+    document.getElementById('stat-tend').innerText = tenders.length;
+    document.getElementById('nb-proj').innerText = projects.length;
+    document.getElementById('nb-tend').innerText = tenders.length;
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+function exportCSV() {
+    let csv = "Type,Client,Workstream,Status,Deadline\n";
+    projects.forEach(p => csv += `Project,${p.client},${p.workstream},${p.status},${p.deadline}\n`);
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('href', url);
+    a.setAttribute('download', 'OLS_Hub_Export.csv');
+    a.click();
+}
+
+window.onload = renderAll;
+</script>
+</body>
+</html>
