@@ -330,40 +330,12 @@ textarea{resize:vertical;min-height:68px;line-height:1.5;}
 
     <!-- DASHBOARD -->
     <div id="page-dashboard">
-     <div class="dash-grid">
-  <div class="dash-card" onclick="filterByStatus('active')" style="cursor: pointer;">
-    <div class="dash-card-accent" style="background:var(--teal);"></div>
-    <div class="dash-label">Active Clients</div>
-    <div class="dash-value" id="d-clients">0</div>
-    <div class="dash-sub">projects running</div>
-  </div>
-
-  <div class="dash-card" onclick="filterByStatus('tenders')" style="cursor: pointer;">
-    <div class="dash-card-accent" style="background:var(--blue);"></div>
-    <div class="dash-label">Tenders In Flight</div>
-    <div class="dash-value" id="d-tenders" style="color:var(--blue);">0</div>
-    <div class="dash-sub">open RFQ / RFX</div>
-  </div>
-
-  <div class="dash-card" onclick="filterByStatus('due')" style="cursor: pointer;">
-    <div class="dash-card-accent" style="background:var(--amber);"></div>
-    <div class="dash-label">Due This Week</div>
-    <div class="dash-value" id="d-week" style="color:var(--amber);">0</div>
-    <div class="dash-sub">deadlines approaching</div>
-  </div>
-
-  <div class="dash-card" onclick="filterByStatus('blocked')" style="cursor: pointer;">
-    <div class="dash-card-accent" style="background:var(--red);"></div>
-    <div class="dash-label">Blocked Items</div>
-    <div class="dash-value" id="d-blocked" style="color:var(--red);">0</div>
-    <div class="dash-sub">need attention</div>
-  </div>
-</div>
-
-<div id="filter-banner" style="display:none; margin-bottom:15px; font-size:12px; color:var(--teal-dark);">
-  <span id="filter-text"></span> 
-  <button onclick="clearDashboardFilter()" style="background:none; border:none; text-decoration:underline; cursor:pointer; margin-left:10px; color:var(--blue);">Clear Filter</button>
-</div>
+      <div class="dash-grid">
+        <div class="dash-card"><div class="dash-card-accent" style="background:var(--teal);"></div><div class="dash-label">Active Clients</div><div class="dash-value" id="d-clients">0</div><div class="dash-sub">projects running</div></div>
+        <div class="dash-card"><div class="dash-card-accent" style="background:var(--blue);"></div><div class="dash-label">Tenders In Flight</div><div class="dash-value" id="d-tenders" style="color:var(--blue);">0</div><div class="dash-sub">open RFQ / RFX</div></div>
+        <div class="dash-card"><div class="dash-card-accent" style="background:var(--amber);"></div><div class="dash-label">Due This Week</div><div class="dash-value" id="d-week" style="color:var(--amber);">0</div><div class="dash-sub">deadlines approaching</div></div>
+        <div class="dash-card"><div class="dash-card-accent" style="background:var(--red);"></div><div class="dash-label">Blocked Items</div><div class="dash-value" id="d-blocked" style="color:var(--red);">0</div><div class="dash-sub">need attention</div></div>
+      </div>
       <div class="charts-row">
         <div class="chart-card">
           <div class="chart-title">Portfolio Health</div>
@@ -990,35 +962,6 @@ function overlayClose(e,id){if(e.target.id===id)closeModal(id);}
 if(gsConfig.url)document.getElementById('setup-banner').style.display='none';
 updateConnStatus();
 renderDashboard();
-  function filterByStatus(type) {
-  const today = new Date();
-  const nextWeek = new Date();
-  nextWeek.setDate(today.getDate() + 7);
-  
-  document.getElementById('filter-banner').style.display = 'block';
-  document.getElementById('filter-text').innerText = "Filtering by: " + type.toUpperCase();
-
-  if (type === 'active') {
-    renderProjects(projects.filter(p => p.status === 'On Track'));
-    renderTenders([]); 
-  } else if (type === 'tenders') {
-    renderProjects([]);
-    renderTenders(tenders);
-  } else if (type === 'due') {
-    const isDue = (d) => d && new Date(d) <= nextWeek;
-    renderProjects(projects.filter(p => isDue(p.deadline)));
-    renderTenders(tenders.filter(t => isDue(t.deadline)));
-  } else if (type === 'blocked') {
-    renderProjects(projects.filter(p => p.status === 'Blocked'));
-    renderTenders(tenders.filter(t => t.status === 'Blocked'));
-  }
-}
-
-function clearDashboardFilter() {
-  document.getElementById('filter-banner').style.display = 'none';
-  renderProjects();
-  renderTenders();
-}
 </script>
 </body>
 </html>
