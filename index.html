@@ -100,21 +100,27 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 .sheet-client-name{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);}
 .sheet-client-meta{font-size:11px;color:var(--text-3);font-family:var(--mono);}
 .sheet-table{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
-.proj-head,.proj-row{display:grid;grid-template-columns:180px 110px 1fr 1fr 110px 100px;}
-.tend-head,.tend-row{display:grid;grid-template-columns:160px 90px 1fr 160px 110px 110px;}
+/* ── RESIZABLE GRID TABLES ── */
+.sheet-table{--pc1:180px;--pc2:110px;--pc3:1fr;--pc4:1fr;--pc5:110px;--pc6:100px;--tc1:160px;--tc2:90px;--tc3:1fr;--tc4:160px;--tc5:110px;--tc6:110px;}
+.proj-head,.proj-row{display:grid;grid-template-columns:var(--pc1) var(--pc2) var(--pc3) var(--pc4) var(--pc5) var(--pc6);}
+.tend-head,.tend-row{display:grid;grid-template-columns:var(--tc1) var(--tc2) var(--tc3) var(--tc4) var(--tc5) var(--tc6);}
 .sheet-head-row{background:var(--bg);border-bottom:2px solid var(--border-md);}
-.sh-cell{padding:8px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-3);border-right:1px solid var(--border);}
+.sh-cell{padding:8px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-3);border-right:1px solid var(--border);position:relative;user-select:none;}
 .sh-cell:last-child{border-right:none;}
+/* Resize handle */
+.col-resizer{position:absolute;right:-3px;top:0;bottom:0;width:7px;cursor:col-resize;z-index:10;display:flex;align-items:center;justify-content:center;}
+.col-resizer::after{content:'';display:block;width:2px;height:60%;background:var(--border-md);border-radius:2px;transition:background 0.15s;}
+.col-resizer:hover::after,.col-resizer.dragging::after{background:var(--teal-mid);}
 .sheet-row-item{border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s;align-items:stretch;}
 .sheet-row-item:last-child{border-bottom:none;}
 .sheet-row-item:hover{background:#f8faf9;}
-.sd-cell{padding:10px 12px;font-size:13px;color:var(--text);border-right:1px solid var(--border);display:flex;align-items:center;overflow:hidden;}
+.sd-cell{padding:10px 12px;font-size:13px;color:var(--text);border-right:1px solid var(--border);display:flex;align-items:flex-start;min-width:0;word-break:break-word;}
 .sd-cell:last-child{border-right:none;}
 .sd-cell-name{flex-direction:column;align-items:flex-start;gap:2px;position:relative;padding-left:16px;}
 .sd-cell-bar{position:absolute;left:0;top:0;bottom:0;width:3px;}
-.sd-cell-title{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
-.sd-cell-sub{font-size:11px;color:var(--text-3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
-.sd-cell-text{font-size:12.5px;color:var(--text-2);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.sd-cell-title{font-size:13px;font-weight:600;word-break:break-word;white-space:normal;max-width:100%;}
+.sd-cell-sub{font-size:11px;color:var(--text-3);word-break:break-word;white-space:normal;max-width:100%;}
+.sd-cell-text{font-size:12.5px;color:var(--text-2);line-height:1.5;word-break:break-word;white-space:normal;}
 .sd-cell-link{font-size:12px;color:var(--blue-dark);text-decoration:none;display:flex;align-items:center;gap:3px;}
 .sd-cell-link:hover{text-decoration:underline;}
 .badge{font-size:10.5px;font-weight:500;padding:2px 8px;border-radius:99px;white-space:nowrap;display:inline-block;}
@@ -224,13 +230,14 @@ textarea{resize:vertical;min-height:68px;line-height:1.5;}
 .toast{position:fixed;bottom:1.25rem;right:1.25rem;background:var(--navy);color:#fff;padding:9px 16px;border-radius:var(--radius);font-size:13px;z-index:999;opacity:0;transition:opacity 0.2s;pointer-events:none;box-shadow:var(--shadow-md);}
 .toast.show{opacity:1;}
 .conn-badge{display:inline-flex;align-items:center;gap:4px;background:var(--teal-light);color:var(--teal-dark);font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:99px;}
-.week-cell{font-size:12px;color:var(--text-2);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;}
+.week-cell{font-size:12px;color:var(--text-2);line-height:1.5;word-break:break-word;white-space:normal;}
 @media(max-width:900px){
   .sidebar{display:none;} .main{margin-left:0;}
   .dash-grid{grid-template-columns:1fr 1fr;}
   .tool-links{grid-template-columns:1fr;}
   .form-grid{grid-template-columns:1fr;}
   .proj-head,.proj-row{grid-template-columns:1fr 90px 80px;}
+  .tend-head,.tend-row{grid-template-columns:1fr 90px 80px;}
   .sh-cell:nth-child(n+4),.sd-cell:nth-child(n+4){display:none;}
 }
 </style>
@@ -480,8 +487,8 @@ textarea{resize:vertical;min-height:68px;line-height:1.5;}
         </div>
       </div>
       <div class="sheet-table">
-        <div class="tend-head sheet-head-row">
-          <div class="sh-cell">Client</div><div class="sh-cell">Type</div><div class="sh-cell">Key Milestones</div><div class="sh-cell">Document</div><div class="sh-cell">Owner</div><div class="sh-cell">Status</div>
+        <div class="tend-head sheet-head-row" id="tend-head-row">
+          <div class="sh-cell">Client<span class="col-resizer" data-table="tend" data-col="1"></span></div><div class="sh-cell">Type<span class="col-resizer" data-table="tend" data-col="2"></span></div><div class="sh-cell">Key Milestones<span class="col-resizer" data-table="tend" data-col="3"></span></div><div class="sh-cell">Document<span class="col-resizer" data-table="tend" data-col="4"></span></div><div class="sh-cell">Owner<span class="col-resizer" data-table="tend" data-col="5"></span></div><div class="sh-cell">Status</div>
         </div>
         <div id="tend-board"></div>
       </div>
@@ -780,7 +787,7 @@ function renderProjects(){
   list.forEach(p=>{if(!grouped[p.client])grouped[p.client]=[];grouped[p.client].push(p);});
   board.innerHTML=Object.keys(grouped).map(client=>{
     const rows=grouped[client];const svc=rows[0].service;const color=SVC_COLORS[svc]||'#888';
-    return `<div class="sheet-wrap"><div class="sheet-client-header"><div class="sheet-client-dot" style="background:${color};"></div><span class="sheet-client-name">${escH(client)}</span><span class="sheet-client-meta">${rows.length} workstream${rows.length!==1?'s':''}</span></div><div class="sheet-table"><div class="proj-head sheet-head-row"><div class="sh-cell">Workstream</div><div class="sh-cell">Service</div><div class="sh-cell">Last Week</div><div class="sh-cell">This Week</div><div class="sh-cell">Owner</div><div class="sh-cell">Status</div></div>${rows.map(p=>buildProjRow(p,color)).join('')}</div></div>`;
+    return `<div class="sheet-wrap"><div class="sheet-client-header"><div class="sheet-client-dot" style="background:${color};"></div><span class="sheet-client-name">${escH(client)}</span><span class="sheet-client-meta">${rows.length} workstream${rows.length!==1?'s':''}</span></div><div class="sheet-table" data-table-type="proj"><div class="proj-head sheet-head-row"><div class="sh-cell">Workstream<span class="col-resizer" data-table="proj" data-col="1"></span></div><div class="sh-cell">Service<span class="col-resizer" data-table="proj" data-col="2"></span></div><div class="sh-cell">Last Week<span class="col-resizer" data-table="proj" data-col="3"></span></div><div class="sh-cell">This Week<span class="col-resizer" data-table="proj" data-col="4"></span></div><div class="sh-cell">Owner<span class="col-resizer" data-table="proj" data-col="5"></span></div><div class="sh-cell">Status</div></div>${rows.map(p=>buildProjRow(p,color)).join('')}</div></div>`;
   }).join('');
 }
 function buildProjRow(p,color){
@@ -957,6 +964,90 @@ function exportCSV(){
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');editingId=null;}
 function overlayClose(e,id){if(e.target.id===id)closeModal(id);}
+
+// ── COLUMN RESIZE ──
+// Store column widths (px) per table type; null means use default
+const colWidths = {proj: [180,110,null,null,110,100], tend: [160,90,null,null,110,110]};
+const colVars = {
+  proj: ['--pc1','--pc2','--pc3','--pc4','--pc5','--pc6'],
+  tend: ['--tc1','--tc2','--tc3','--tc4','--tc5','--tc6']
+};
+
+function applyColWidths(tableType) {
+  const widths = colWidths[tableType];
+  const vars = colVars[tableType];
+  // Build grid-template-columns string
+  const cols = widths.map((w,i) => {
+    if (w === null) {
+      // For flex columns, use minmax so they share space
+      return 'minmax(80px,1fr)';
+    }
+    return Math.max(60, w) + 'px';
+  }).join(' ');
+  // Apply to all sheet-tables for this type
+  document.querySelectorAll('.sheet-table').forEach(tbl => {
+    tbl.querySelectorAll('.'+tableType+'-head, .'+tableType+'-row').forEach(row => {
+      row.style.gridTemplateColumns = cols;
+    });
+  });
+}
+
+function initColResize() {
+  document.addEventListener('mousedown', function(e) {
+    const handle = e.target.closest('.col-resizer');
+    if (!handle) return;
+    e.preventDefault();
+    const tableType = handle.dataset.table;
+    const colIdx = parseInt(handle.dataset.col) - 1; // 0-based
+    handle.classList.add('dragging');
+
+    // Get the header cell to know starting width
+    const headerCell = handle.closest('.sh-cell');
+    const startX = e.clientX;
+    const startWidth = headerCell.offsetWidth;
+    let currentWidth = startWidth;
+
+    function onMove(ev) {
+      const delta = ev.clientX - startX;
+      currentWidth = Math.max(60, startWidth + delta);
+      colWidths[tableType][colIdx] = currentWidth;
+      applyColWidths(tableType);
+    }
+    function onUp() {
+      handle.classList.remove('dragging');
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+
+  // Touch support
+  document.addEventListener('touchstart', function(e) {
+    const handle = e.target.closest('.col-resizer');
+    if (!handle) return;
+    const tableType = handle.dataset.table;
+    const colIdx = parseInt(handle.dataset.col) - 1;
+    handle.classList.add('dragging');
+    const headerCell = handle.closest('.sh-cell');
+    const startX = e.touches[0].clientX;
+    const startWidth = headerCell.offsetWidth;
+
+    function onMove(ev) {
+      const delta = ev.touches[0].clientX - startX;
+      colWidths[tableType][colIdx] = Math.max(60, startWidth + delta);
+      applyColWidths(tableType);
+    }
+    function onEnd() {
+      handle.classList.remove('dragging');
+      document.removeEventListener('touchmove', onMove);
+      document.removeEventListener('touchend', onEnd);
+    }
+    document.addEventListener('touchmove', onMove, {passive:true});
+    document.addEventListener('touchend', onEnd);
+  }, {passive:true});
+}
+initColResize();
 
 // ── INIT ──
 if(gsConfig.url)document.getElementById('setup-banner').style.display='none';
