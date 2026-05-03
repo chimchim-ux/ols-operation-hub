@@ -101,14 +101,14 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 .sheet-client-meta{font-size:11px;color:var(--text-3);font-family:var(--mono);}
 .sheet-table{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
 .proj-head,.proj-row{display:grid;grid-template-columns:180px 110px 1fr 1fr 110px 100px;}
-.tend-head,.tend-row{display:grid;grid-template-columns:160px 120px 1fr 160px 110px 110px;}
+.tend-head,.tend-row{display:grid;grid-template-columns:160px 90px 1fr 160px 110px 110px;}
 .sheet-head-row{background:var(--bg);border-bottom:2px solid var(--border-md);}
 .sh-cell{padding:8px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-3);border-right:1px solid var(--border);}
 .sh-cell:last-child{border-right:none;}
 .sheet-row-item{border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.1s;align-items:stretch;}
 .sheet-row-item:last-child{border-bottom:none;}
 .sheet-row-item:hover{background:#f8faf9;}
-.sd-cell{padding:10px 12px;font-size:13px;color:var(--text);border-right:1px solid var(--border);display:flex;align-items:center;flex-wrap:wrap;}
+.sd-cell{padding:10px 12px;font-size:13px;color:var(--text);border-right:1px solid var(--border);display:flex;align-items:center;overflow:hidden;}
 .sd-cell:last-child{border-right:none;}
 .sd-cell-name{flex-direction:column;align-items:flex-start;gap:2px;position:relative;padding-left:16px;}
 .sd-cell-bar{position:absolute;left:0;top:0;bottom:0;width:3px;}
@@ -117,7 +117,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 .sd-cell-text{font-size:12.5px;color:var(--text-2);line-height:1.5;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
 .sd-cell-link{font-size:12px;color:var(--blue-dark);text-decoration:none;display:flex;align-items:center;gap:3px;}
 .sd-cell-link:hover{text-decoration:underline;}
-.badge{font-size:10.5px;font-weight:500;padding:2px 8px;border-radius:99px;white-space:normal;word-break:break-word;display:inline-block;line-height:1.4;text-align:center;}
+.badge{font-size:10.5px;font-weight:500;padding:2px 8px;border-radius:99px;white-space:nowrap;display:inline-block;}
 .b-ontrack{background:#E1F5EE;color:#085041;}
 .b-waiting{background:#E6F1FB;color:#0C447C;}
 .b-blocked{background:#fef2f2;color:#7f1d1d;}
@@ -401,6 +401,22 @@ textarea{resize:vertical;min-height:68px;line-height:1.5;}
         <div class="filter-pill" onclick="setProjFilter('Technology',this)">Technology</div>
         <div class="filter-pill" onclick="setProjFilter('Advisory',this)">Advisory</div>
         <div class="filter-pill" onclick="setProjFilter('Blocked',this)">Blocked</div>
+        <div class="filter-dropdown" id="proj-status-filter-dd">
+          <div class="filter-dropdown-btn" id="proj-status-filter-btn" onclick="toggleStatusFilterDD()">Filter by Status <span class="arrow">▼</span></div>
+          <div class="filter-dropdown-menu" id="proj-status-filter-menu">
+            <div class="fdm-section">Status</div>
+            <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:4px;">
+              <div class="fdm-month-btn" style="text-align:left;padding:5px 10px;" onclick="toggleProjStatus('On Track',this)">On Track</div>
+              <div class="fdm-month-btn" style="text-align:left;padding:5px 10px;" onclick="toggleProjStatus('Waiting',this)">Waiting</div>
+              <div class="fdm-month-btn" style="text-align:left;padding:5px 10px;" onclick="toggleProjStatus('Blocked',this)">Blocked</div>
+              <div class="fdm-month-btn" style="text-align:left;padding:5px 10px;" onclick="toggleProjStatus('Completed',this)">Completed</div>
+            </div>
+            <div class="fdm-footer">
+              <button class="fdm-clear" onclick="clearStatusFilter()">Clear</button>
+              <button class="fdm-apply" onclick="applyStatusFilter()">Apply</button>
+            </div>
+          </div>
+        </div>
         <div class="filter-dropdown" id="proj-filter-dd">
           <div class="filter-dropdown-btn" id="proj-filter-btn" onclick="toggleFilterDD('proj')">Filter by Date <span class="arrow">▼</span></div>
           <div class="filter-dropdown-menu" id="proj-filter-menu">
@@ -655,6 +671,35 @@ function clearDateFilter(scope){
   document.querySelectorAll(`#${scope}-filter-menu .fdm-month-btn`).forEach(b=>b.classList.remove('sel'));
   applyDateFilter(scope);
 }
+// ── PROJECT STATUS FILTER ──
+let projStatusFilter=[];
+function toggleStatusFilterDD(){
+  const menu=document.getElementById('proj-status-filter-menu');
+  const btn=document.getElementById('proj-status-filter-btn');
+  const isOpen=menu.classList.contains('open');
+  document.querySelectorAll('.filter-dropdown-menu').forEach(m=>m.classList.remove('open'));
+  document.querySelectorAll('.filter-dropdown-btn').forEach(b=>b.classList.remove('open'));
+  if(!isOpen){menu.classList.add('open');btn.classList.add('open');}
+}
+function toggleProjStatus(status,el){
+  if(projStatusFilter.includes(status)){projStatusFilter=projStatusFilter.filter(s=>s!==status);el.classList.remove('sel');}
+  else{projStatusFilter.push(status);el.classList.add('sel');}
+}
+function applyStatusFilter(){
+  const menu=document.getElementById('proj-status-filter-menu');
+  const btn=document.getElementById('proj-status-filter-btn');
+  menu.classList.remove('open');btn.classList.remove('open');
+  const hasFilter=projStatusFilter.length>0;
+  btn.classList.toggle('has-filter',hasFilter);
+  btn.childNodes[0].textContent=(hasFilter?projStatusFilter.join(', '):'Filter by Status')+' ';
+  renderProjects();
+}
+function clearStatusFilter(){
+  projStatusFilter=[];
+  document.querySelectorAll('#proj-status-filter-menu .fdm-month-btn').forEach(b=>b.classList.remove('sel'));
+  applyStatusFilter();
+}
+
 function applyDF(list,scope){
   const f=dateFilters[scope];
   if(f.years.length)list=list.filter(x=>x.deadline&&f.years.includes(x.deadline.slice(0,4)));
@@ -772,6 +817,7 @@ function renderProjects(){
   let list=[...projects];
   if(projFilter!=='all'&&projFilter!=='Blocked')list=list.filter(p=>p.service===projFilter);
   if(projFilter==='Blocked')list=list.filter(p=>p.status==='Blocked');
+  if(projStatusFilter.length)list=list.filter(p=>projStatusFilter.includes(p.status));
   if(q)list=list.filter(p=>(p.client+p.workstream+p.service+p.owner).toLowerCase().includes(q));
   list=applyDF(list,'proj');
   const board=document.getElementById('proj-board');
