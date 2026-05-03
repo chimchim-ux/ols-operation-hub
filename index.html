@@ -336,15 +336,62 @@ textarea{resize:vertical;min-height:68px;line-height:1.5;}
         <div class="dash-card"><div class="dash-card-accent" style="background:var(--amber);"></div><div class="dash-label">Due This Week</div><div class="dash-value" id="d-week" style="color:var(--amber);">0</div><div class="dash-sub">deadlines approaching</div></div>
         <div class="dash-card"><div class="dash-card-accent" style="background:var(--red);"></div><div class="dash-label">Blocked Items</div><div class="dash-value" id="d-blocked" style="color:var(--red);">0</div><div class="dash-sub">need attention</div></div>
       </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);">Charts</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:11px;color:var(--text-3);">Filter:</span>
+          <!-- Year pills -->
+          <div id="chart-year-pills" style="display:flex;gap:4px;">
+            <div class="fdm-year-btn" onclick="toggleChartYear('2025',this)">2025</div>
+            <div class="fdm-year-btn" onclick="toggleChartYear('2026',this)">2026</div>
+            <div class="fdm-year-btn" onclick="toggleChartYear('2027',this)">2027</div>
+          </div>
+          <div style="width:1px;height:16px;background:var(--border-md);margin:0 2px;"></div>
+          <!-- Month dropdown -->
+          <div class="filter-dropdown" id="chart-month-dd">
+            <div class="filter-dropdown-btn" id="chart-month-btn" onclick="toggleChartMonthDD()" style="padding:3px 10px;font-size:11px;">Month <span class="arrow">▼</span></div>
+            <div class="filter-dropdown-menu" id="chart-month-menu" style="right:0;left:auto;min-width:180px;">
+              <div class="fdm-section">Month</div>
+              <div class="fdm-months">
+                <div class="fdm-month-btn" onclick="toggleChartMonth('01',this)">Jan</div>
+                <div class="fdm-month-btn" onclick="toggleChartMonth('02',this)">Feb</div>
+                <div class="fdm-month-btn" onclick="toggleChartMonth('03',this)">Mar</div>
+                <div class="fdm-month-btn" onclick="toggleChartMonth('04',this)">Apr</div>
+                <div class="fdm-month-btn" onclick="toggleChartMonth('05',this)">May</div>
+                <div class="fdm-month-btn" onclick="toggleChartMonth('06',this)">Jun</div>
+                <div class="fdm-month-btn" onclick="toggleChartMonth('07',this)">Jul</div>
+                <div class="fdm-month-btn" onclick="toggleChartMonth('08',this)">Aug</div>
+                <div class="fdm-month-btn" onclick="toggleChartMonth('09',this)">Sep</div>
+                <div class="fdm-month-btn" onclick="toggleChartMonth('10',this)">Oct</div>
+                <div class="fdm-month-btn" onclick="toggleChartMonth('11',this)">Nov</div>
+                <div class="fdm-month-btn" onclick="toggleChartMonth('12',this)">Dec</div>
+              </div>
+              <div class="fdm-footer">
+                <button class="fdm-clear" onclick="clearChartFilter()">Clear</button>
+                <button class="fdm-apply" onclick="applyChartFilter()">Apply</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="charts-row">
         <div class="chart-card">
-          <div class="chart-title">Portfolio Health</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <div class="chart-title" style="margin-bottom:0;">Portfolio Health</div>
+            <div id="chart-filter-label" style="font-size:10.5px;color:var(--teal-dark);background:var(--teal-light);padding:2px 8px;border-radius:99px;display:none;"></div>
+          </div>
           <div class="donut-wrap">
             <div class="donut-canvas-wrap"><canvas id="donut-chart" width="110" height="110"></canvas><div class="donut-center"><div class="donut-center-num" id="donut-total">0</div><div class="donut-center-sub">total</div></div></div>
             <div class="donut-legend" id="donut-legend"></div>
           </div>
         </div>
-        <div class="chart-card"><div class="chart-title">Tender Pipeline</div><div class="pipeline-bars" id="pipeline-bars"></div></div>
+        <div class="chart-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+            <div class="chart-title" style="margin-bottom:0;">Tender Pipeline</div>
+            <div id="chart-filter-label2" style="font-size:10.5px;color:var(--teal-dark);background:var(--teal-light);padding:2px 8px;border-radius:99px;display:none;"></div>
+          </div>
+          <div class="pipeline-bars" id="pipeline-bars"></div>
+        </div>
       </div>
       <div style="margin-bottom:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);">Connected Tools</div>
       <div class="tool-links">
@@ -762,6 +809,58 @@ function isThisWeek(ds){
   return d>=n&&d<=we;
 }
 
+// ── CHART DATE FILTER ──
+const chartFilter={years:[],months:[]};
+function toggleChartYear(year,el){
+  if(chartFilter.years.includes(year)){chartFilter.years=chartFilter.years.filter(y=>y!==year);el.classList.remove('sel');}
+  else{chartFilter.years.push(year);el.classList.add('sel');}
+  applyChartFilter();
+}
+function toggleChartMonthDD(){
+  const menu=document.getElementById('chart-month-menu');
+  const btn=document.getElementById('chart-month-btn');
+  const isOpen=menu.classList.contains('open');
+  document.querySelectorAll('.filter-dropdown-menu').forEach(m=>m.classList.remove('open'));
+  document.querySelectorAll('.filter-dropdown-btn').forEach(b=>b.classList.remove('open'));
+  if(!isOpen){menu.classList.add('open');btn.classList.add('open');}
+}
+function toggleChartMonth(month,el){
+  if(chartFilter.months.includes(month)){chartFilter.months=chartFilter.months.filter(m=>m!==month);el.classList.remove('sel');}
+  else{chartFilter.months.push(month);el.classList.add('sel');}
+}
+function applyChartFilter(){
+  const menu=document.getElementById('chart-month-menu');
+  const btn=document.getElementById('chart-month-btn');
+  if(menu){menu.classList.remove('open');btn.classList.remove('open');}
+  const hasFilter=chartFilter.years.length||chartFilter.months.length;
+  if(btn){btn.classList.toggle('has-filter',!!hasFilter);}
+  const mnames=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const label=hasFilter
+    ?(chartFilter.years.length&&chartFilter.months.length
+      ?chartFilter.years.join(',')+' · '+chartFilter.months.map(m=>mnames[parseInt(m)-1]).join(',')
+      :chartFilter.years.length?chartFilter.years.join(' / ')
+      :chartFilter.months.map(m=>mnames[parseInt(m)-1]).join(', '))
+    :'';
+  ['chart-filter-label','chart-filter-label2'].forEach(id=>{
+    const lbl=document.getElementById(id);
+    if(lbl){lbl.textContent=label;lbl.style.display=label?'':'none';}
+  });
+  renderDonutChart();
+  renderPipelineBars();
+}
+function clearChartFilter(){
+  chartFilter.years=[];chartFilter.months=[];
+  document.querySelectorAll('#chart-year-pills .fdm-year-btn').forEach(b=>b.classList.remove('sel'));
+  document.querySelectorAll('#chart-month-menu .fdm-month-btn').forEach(b=>b.classList.remove('sel'));
+  applyChartFilter();
+}
+function applyChartDF(list){
+  let out=[...list];
+  if(chartFilter.years.length)out=out.filter(x=>x.deadline&&chartFilter.years.includes(x.deadline.slice(0,4)));
+  if(chartFilter.months.length)out=out.filter(x=>x.deadline&&chartFilter.months.includes(x.deadline.slice(5,7)));
+  return out;
+}
+
 function renderDonutChart(){
   const canvas=document.getElementById('donut-chart');
   if(!canvas)return;
@@ -771,8 +870,9 @@ function renderDonutChart(){
   canvas.style.width='110px';canvas.style.height='110px';
   ctx.scale(dpr,dpr);
   const statusDefs=[{key:'On Track',color:'#1D9E75',label:'On Track'},{key:'Waiting',color:'#378ADD',label:'Waiting'},{key:'Blocked',color:'#c23a3a',label:'Blocked'},{key:'Completed',color:'#5DCAA5',label:'Completed'}];
-  const counts=statusDefs.map(s=>({...s,count:projects.filter(p=>p.status===s.key).length}));
-  const total=projects.length;
+  const filteredProj=applyChartDF(projects);
+  const counts=statusDefs.map(s=>({...s,count:filteredProj.filter(p=>p.status===s.key).length}));
+  const total=filteredProj.length;
   document.getElementById('donut-total').textContent=total;
   const cx=55,cy=55,r=44,inner=28;
   ctx.clearRect(0,0,110,110);
@@ -803,7 +903,8 @@ function animateDonut(ctx,cx,cy,r,inner,slices,total){
 function renderPipelineBars(){
   const el=document.getElementById('pipeline-bars');if(!el)return;
   const stages=[{key:'Upcoming',color:'#378ADD',label:'Upcoming'},{key:'Submitted',color:'#7F77DD',label:'Submitted'},{key:'Negotiating',color:'#BA7517',label:'Negotiating'},{key:'Won',color:'#1D9E75',label:'Won'},{key:'Lost',color:'#c23a3a',label:'Lost'}];
-  const counts=stages.map(s=>({...s,count:tenders.filter(t=>t.status===s.key).length}));
+  const filteredTend=applyChartDF(tenders);
+  const counts=stages.map(s=>({...s,count:filteredTend.filter(t=>t.status===s.key).length}));
   const max=Math.max(...counts.map(s=>s.count),1);
   if(!tenders.length){el.innerHTML='<div style="font-size:12px;color:#8aada0;text-align:center;padding:20px 0;">No tenders yet</div>';return;}
   el.innerHTML=counts.map(s=>`<div class="pipe-row"><div class="pipe-label">${s.label}</div><div class="pipe-track"><div class="pipe-fill" style="background:${s.color};" data-pct="${Math.round(s.count/max*100)}"></div></div><div class="pipe-count">${s.count}</div></div>`).join('');
