@@ -99,12 +99,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 .sheet-client-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
 .sheet-client-name{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-2);}
 .sheet-client-meta{font-size:11px;color:var(--text-3);font-family:var(--mono);}
-.sheet-table{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow-x:auto;overflow-y:hidden;}
-.proj-head,.proj-row{display:grid;grid-template-columns:var(--proj-cols,180px 110px 1fr 1fr 110px 100px);}
-.tend-head,.tend-row{display:grid;grid-template-columns:var(--tend-cols,160px 90px 1fr 160px 110px 110px);}
-.sh-cell{position:relative;}
-.col-resizer{position:absolute;right:0;top:0;bottom:0;width:5px;cursor:col-resize;z-index:10;user-select:none;}
-.col-resizer:hover,.col-resizer.dragging{background:var(--teal-mid);opacity:0.7;}
+.sheet-table{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+.proj-head,.proj-row{display:grid;grid-template-columns:180px 110px 1fr 1fr 110px 100px;}
+.tend-head,.tend-row{display:grid;grid-template-columns:160px 90px 1fr 160px 110px 110px;}
 .sheet-head-row{background:var(--bg);border-bottom:2px solid var(--border-md);}
 .sh-cell{padding:8px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-3);border-right:1px solid var(--border);}
 .sh-cell:last-child{border-right:none;}
@@ -482,7 +479,12 @@ textarea{resize:vertical;min-height:68px;line-height:1.5;}
           </div>
         </div>
       </div>
-      <div id="tend-board"></div>
+      <div class="sheet-table">
+        <div class="tend-head sheet-head-row">
+          <div class="sh-cell">Client</div><div class="sh-cell">Type</div><div class="sh-cell">Key Milestones</div><div class="sh-cell">Document</div><div class="sh-cell">Owner</div><div class="sh-cell">Status</div>
+        </div>
+        <div id="tend-board"></div>
+      </div>
     </div>
 
     <!-- WEEKLY REPORT -->
@@ -778,12 +780,8 @@ function renderProjects(){
   list.forEach(p=>{if(!grouped[p.client])grouped[p.client]=[];grouped[p.client].push(p);});
   board.innerHTML=Object.keys(grouped).map(client=>{
     const rows=grouped[client];const svc=rows[0].service;const color=SVC_COLORS[svc]||'#888';
-    const projCols=['Workstream','Service','Last Week','This Week','Owner','Status'];
-    const headCells=projCols.map((h,i)=>`<div class="sh-cell">${h}${i<projCols.length-1?'<div class="col-resizer" data-table="proj" data-col="'+i+'"></div>':''}</div>`).join('');
-    return `<div class="sheet-wrap"><div class="sheet-client-header"><div class="sheet-client-dot" style="background:${color};"></div><span class="sheet-client-name">${escH(client)}</span><span class="sheet-client-meta">${rows.length} workstream${rows.length!==1?'s':''}</span></div><div class="sheet-table proj-table"><div class="proj-head sheet-head-row">${headCells}</div>${rows.map(p=>buildProjRow(p,color)).join('')}</div></div>`;
+    return `<div class="sheet-wrap"><div class="sheet-client-header"><div class="sheet-client-dot" style="background:${color};"></div><span class="sheet-client-name">${escH(client)}</span><span class="sheet-client-meta">${rows.length} workstream${rows.length!==1?'s':''}</span></div><div class="sheet-table"><div class="proj-head sheet-head-row"><div class="sh-cell">Workstream</div><div class="sh-cell">Service</div><div class="sh-cell">Last Week</div><div class="sh-cell">This Week</div><div class="sh-cell">Owner</div><div class="sh-cell">Status</div></div>${rows.map(p=>buildProjRow(p,color)).join('')}</div></div>`;
   }).join('');
-  applyColWidths('proj');
-  document.querySelectorAll('.proj-table').forEach(t=>initResizers(t));
 }
 function buildProjRow(p,color){
   const sc=STATUS_BADGE[p.status]||'b-waiting';const sb=SVC_BADGE[p.service]||'sb-advisory';
@@ -799,12 +797,8 @@ function renderTenders(){
   if(q)list=list.filter(t=>(t.client+t.type+t.owner).toLowerCase().includes(q));
   list=applyDF(list,'tend');
   const board=document.getElementById('tend-board');
-  if(!list.length){board.innerHTML='<div class="empty-box"><h3>No tenders found</h3><p>Add a tender or adjust the filter</p></div>';return;}
-  const tendCols=['Client','Type','Key Milestones','Document','Owner','Status'];
-  const headCells=tendCols.map((h,i)=>`<div class="sh-cell">${h}${i<tendCols.length-1?'<div class="col-resizer" data-table="tend" data-col="'+i+'"></div>':''}</div>`).join('');
-  board.innerHTML=`<div class="sheet-table" id="tend-table"><div class="tend-head sheet-head-row">${headCells}</div>${list.map(t=>buildTendRow(t)).join('')}</div>`;
-  applyColWidths('tend');
-  initResizers(document.getElementById('tend-table'));
+  if(!list.length){board.innerHTML='<div class="empty-box" style="border:none;box-shadow:none;"><h3>No tenders found</h3><p>Add a tender or adjust the filter</p></div>';return;}
+  board.innerHTML=list.map(t=>buildTendRow(t)).join('');
 }
 function buildTendRow(t){
   const sc=STATUS_BADGE[t.status]||'b-waiting';const tc=TEND_TYPE_BADGE[t.type]||'b-rfq';
@@ -963,44 +957,6 @@ function exportCSV(){
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');editingId=null;}
 function overlayClose(e,id){if(e.target.id===id)closeModal(id);}
-
-// ── COLUMN RESIZE ──
-const colWidths={
-  proj:[180,110,220,220,110,100],
-  tend:[160,90,220,160,110,110]
-};
-function applyColWidths(type){
-  const w=colWidths[type];
-  const val=w.map(x=>x+'px').join(' ');
-  document.querySelectorAll(`.${type}-head,.${type}-row`).forEach(el=>{
-    el.style.gridTemplateColumns=val;
-  });
-}
-function initResizers(table){
-  table.querySelectorAll('.col-resizer').forEach(handle=>{
-    handle.addEventListener('mousedown',function(e){
-      e.preventDefault();
-      e.stopPropagation();
-      const type=this.dataset.table;
-      const colIdx=parseInt(this.dataset.col);
-      const startX=e.clientX;
-      const startW=colWidths[type][colIdx];
-      this.classList.add('dragging');
-      function onMove(e){
-        const diff=e.clientX-startX;
-        colWidths[type][colIdx]=Math.max(60,startW+diff);
-        applyColWidths(type);
-      }
-      function onUp(){
-        handle.classList.remove('dragging');
-        document.removeEventListener('mousemove',onMove);
-        document.removeEventListener('mouseup',onUp);
-      }
-      document.addEventListener('mousemove',onMove);
-      document.addEventListener('mouseup',onUp);
-    });
-  });
-}
 
 // ── INIT ──
 if(gsConfig.url)document.getElementById('setup-banner').style.display='none';
