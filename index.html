@@ -47,7 +47,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14
 .topbar-title{font-size:15px;font-weight:600;color:var(--text);}
 .topbar-sub{font-size:12px;color:var(--text-3);margin-top:1px;}
 .topbar-actions{display:flex;gap:8px;align-items:center;}
-.content{padding:24px 28px;}
+.content{padding:24px 28px;min-width:0;}
 .btn{font-family:var(--font);font-size:13px;padding:7px 14px;border-radius:var(--radius-sm);border:1px solid var(--border-md);background:var(--surface);color:var(--text);cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
 .btn:hover{background:var(--bg);}
 .btn-teal{background:var(--teal);color:#fff;border-color:var(--teal);font-weight:500;}
@@ -780,7 +780,7 @@ function renderProjects(){
   list.forEach(p=>{if(!grouped[p.client])grouped[p.client]=[];grouped[p.client].push(p);});
   board.innerHTML=Object.keys(grouped).map(client=>{
     const rows=grouped[client];const svc=rows[0].service;const color=SVC_COLORS[svc]||'#888';
-    return `<div class="sheet-wrap"><div class="sheet-client-header"><div class="sheet-client-dot" style="background:${color};"></div><span class="sheet-client-name">${escH(client)}</span><span class="sheet-client-meta">${rows.length} workstream${rows.length!==1?'s':''}</span></div><div class="sheet-table"><div class="proj-head sheet-head-row"><div class="sh-cell">Workstream</div><div class="sh-cell">Service</div><div class="sh-cell">Last Week</div><div class="sh-cell">This Week</div><div class="sh-cell">Owner</div><div class="sh-cell">Status</div></div>${rows.map(p=>buildProjRow(p,color)).join('')}</div></div>`;
+    return `<div class="sheet-wrap"><div class="sheet-client-header"><div class="sheet-client-dot" style="background:${color};"></div><span class="sheet-client-name">${escH(client)}</span><span class="sheet-client-meta">${rows.length} workstream${rows.length!==1?'s':''}</span></div><div class="sheet-table"><div style="overflow-x:auto;"><div class="proj-head sheet-head-row"><div class="sh-cell">Workstream</div><div class="sh-cell">Service</div><div class="sh-cell">Last Week</div><div class="sh-cell">This Week</div><div class="sh-cell">Owner</div><div class="sh-cell">Status</div></div>${rows.map(p=>buildProjRow(p,color)).join('')}</div></div></div>`;
   }).join('');
 }
 function buildProjRow(p,color){
@@ -798,7 +798,7 @@ function renderTenders(){
   list=applyDF(list,'tend');
   const board=document.getElementById('tend-board');
   if(!list.length){board.innerHTML='<div class="empty-box" style="border:none;box-shadow:none;"><h3>No tenders found</h3><p>Add a tender or adjust the filter</p></div>';return;}
-  board.innerHTML=list.map(t=>buildTendRow(t)).join('');
+  board.innerHTML=`<div class="sheet-table"><div style="overflow-x:auto;"><div class="tend-head sheet-head-row"><div class="sh-cell">Client</div><div class="sh-cell">Type</div><div class="sh-cell">Key Milestones</div><div class="sh-cell">Document</div><div class="sh-cell">Owner</div><div class="sh-cell">Status</div></div>${list.map(t=>buildTendRow(t)).join('')}</div></div>`;
 }
 function buildTendRow(t){
   const sc=STATUS_BADGE[t.status]||'b-waiting';const tc=TEND_TYPE_BADGE[t.type]||'b-rfq';
